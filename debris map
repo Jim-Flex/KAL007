@@ -1,0 +1,176 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html>
+<head>
+  <title>KAL007 Debris Map with Date Legend</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+    #map {
+      height: 100vh; /* Full viewport height */
+      width: 100%; /* Full width */
+    }
+    .leaflet-control-legend {
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      border: 1px solid #000;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    try {
+      var map = L.map('map').setView([41.0, 140.5], 7); // Initial center
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+      var points = [
+        { lat: 42.57502891, lon: 140.7207135, count: 1, date: '6/9/1983' },
+        { lat: 39.47789347, lon: 140.0402753, count: 1, date: '9/9/2001' },
+        { lat: 39.45475204, lon: 140.0343158, count: 1, date: '9/10/2001' },
+        { lat: 39.44793277, lon: 140.0327979, count: 1, date: '9/11/2001' },
+        { lat: 38.822992, lon: 139.773833, count: 1, date: '4/7/2025' },
+        { lat: 39.57215, lon: 140.057097, count: 1, date: '7/7/2025' },
+        { lat: 39.59870902, lon: 140.0599892, count: 7, date: '5/8/1990' },
+        { lat: 39.203687, lon: 139.892913, count: 3, date: '6/8/1990' },
+        { lat: 39.23149831, lon: 139.9062648, count: 9, date: '7/8/1990' },
+        { lat: 39.19533284, lon: 139.9055145, count: 1, date: '8/8/1990' },
+        { lat: 39.04000208, lon: 139.8633588, count: 1, date: '9/8/1990' },
+        { lat: 38.54020653, lon: 139.5481553, count: 3, date: '10/8/1990' },
+        { lat: 38.52321119, lon: 139.5377341, count: 1, date: '11/8/1990' },
+        { lat: 41.31168262, lon: 140.8047341, count: 2, date: '16/11/1989' },
+        { lat: 41.33925066, lon: 140.8168475, count: 14, date: '17/9/1983' },
+        { lat: 41.45372473, lon: 140.8791034, count: 9, date: '17/9/1983' },
+        { lat: 41.41025966, lon: 140.8364789, count: 1, date: '13/9/1983' },
+        { lat: 41.35590656, lon: 140.8230629, count: 6, date: '20/9/1983' },
+        { lat: 46.34875111, lon: 141.3164066, count: 4, date: '9/9/1983' },
+        { lat: 46.09136319, lon: 141.1672607, count: 2, date: '10/9/1983' },
+        { lat: 45.35620826, lon: 142.1374593, count: 3, date: '10/9/1983' },
+        { lat: 46.66562803, lon: 141.8569996, count: 1, date: '10/9/1983' },
+        { lat: 42.06602517, lon: 139.4386622, count: 1, date: '21/11/1989' },
+        { lat: 42.10058219, lon: 139.4255132, count: 10, date: '22/11/1989' },
+        { lat: 42.07153275, lon: 139.4669391, count: 4, date: '23/11/1989' },
+        { lat: 43.92587884, lon: 144.5610141, count: 2, date: '9/9/1983' },
+        { lat: 44.10123416, lon: 144.2176794, count: 2, date: '9/9/1983' },
+        { lat: 44.23479868, lon: 143.608895, count: 2, date: '9/9/1983' },
+        { lat: 44.42137835, lon: 143.2355564, count: 2, date: '9/9/1983' },
+        { lat: 44.69677817, lon: 142.8232034, count: 2, date: '9/9/1983' },
+        { lat: 44.88505349, lon: 142.6286534, count: 2, date: '9/9/1983' },
+        { lat: 45.36562259, lon: 142.1181637, count: 1, date: '11/9/1983' },
+        { lat: 44.48574086, lon: 143.1240816, count: 3, date: '11/9/1983' },
+        { lat: 42.36658204, lon: 140.2914142, count: 1, date: '27/11/1989' }
+      ];
+      // Add legend
+      var legend = L.control({ position: 'topright' });
+      legend.onAdd = function(map) {
+        var div = L.DomUtil.create('div', 'leaflet-control-legend');
+        div.innerHTML = `
+          <div class="legend-item"><div class="legend-color" style="background:#FF0000"></div>6 Sept 1983</div>
+          <div class="legend-item"><div class="legend-color" style="background:#FFA500"></div>1983 (other dates)</div>
+          <div class="legend-item"><div class="legend-color" style="background:#008000"></div>1989</div>
+          <div class="legend-item"><div class="legend-color" style="background:#0000FF"></div>1990</div>
+          <div class="legend-item"><div class="legend-color" style="background:#00FFFF"></div>2001</div>
+          <div class="legend-item"><div class="legend-color" style="background:#808080"></div>2025</div>
+        `;
+        return div;
+      };
+      legend.addTo(map);
+      var bounds = new L.LatLngBounds(points.map(p => [p.lat, p.lon]));
+      map.fitBounds(bounds, { padding: [50, 50] });
+      points.forEach(function(point) {
+        var isSai = point.lat >= 41.3 && point.lat <= 41.5 && point.lon >= 140.8 && point.lon <= 140.9 &&
+                    (point.date === '13/9/1983' || point.date === '17/9/1983' || point.date === '20/9/1983');
+        var is2001or2025 = point.date.includes('2001') || point.date.includes('2025');
+        var isSept1983 = point.date.includes('1983');
+        var color;
+        if (point.date === '6/9/1983') {
+          color = '#FF0000'; // Red for 6/9/1983
+        } else if (isSai) {
+          color = '#FFFF00'; // Yellow for Sai Village (13-17 Sept 1983)
+        } else if (isSept1983) {
+          color = '#FFA500'; // Orange for all other 1983 dates
+        } else if (point.date.includes('1989')) {
+          color = '#008000'; // Green for 1989
+        } else if (point.date.includes('1990')) {
+          color = '#0000FF'; // Blue for 1990
+        } else if (point.date.includes('2001')) {
+          color = '#00FFFF'; // Cyan for 2001
+        } else {
+          color = '#808080'; // Grey for 2025
+        }
+        L.circleMarker([point.lat, point.lon], {
+          radius: Math.max(point.count * 2, 6), // Scale by count, min 6px
+          color: color,
+          fillColor: color,
+          fillOpacity: 0.7,
+          weight: isSai || point.date === '6/9/1983' || is2001or2025 ? 2 : 1 // Thicker border
+        }).addTo(map).bindPopup(
+          `Items: ${point.count}<br>Date: ${point.date}<br>Lat: ${point.lat}<br>Lon: ${point.lon}`
+        );
+      });
+    } catch (e) {
+      console.error('Error loading map:', e);
+    }
+  </script>
+</body>
+</html>

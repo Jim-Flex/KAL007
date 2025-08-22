@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KAL007 Debris Map with Currents and Winds</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+    #map {
+      height: 100vh; /* Full viewport height */
+      width: 100%; /* Full width */
+    }
+    .leaflet-control-legend {
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      border: 1px solid #000;
+    }
+    .legend-arrow {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+    .current-arrow {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><polygon points="10,2 16,18 4,18" fill="blue"/></svg>');
+    }
+    .wind-arrow {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><polygon points="10,2 16,18 4,18" fill="white" transform="rotate(45 10 10)"/></svg>');
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    try {
+      var map = L.map('map').setView([41.0, 140.5], 7); // Initial center
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+      var points = [
+        { lat: 42.57502891, lon: 140.7207135, count: 1, date: '6/9/1983' },
+        { lat: 39.47789347, lon: 140.0402753, count: 1, date: '9/9/2001' },
+        { lat: 39.45475204, lon: 140.0343158, count: 1, date: '9/10/2001' },
+        { lat: 39.44793277, lon: 140.0327979, count: 1, date: '9/11/2001' },
+        { lat: 38.822992, lon: 139.773833, count: 1, date: '4/7/2025' },
+        { lat: 39.57215, lon: 140.057097, count: 1, date: '7/7/2025' },
+        { lat: 39.59870902, lon: 140.0599892, count: 7, date: '5/8/1990' },
+        { lat: 39.203687, lon: 139.892913, count: 3, date: '6/8/1990' },
+        { lat: 39.23149831, lon: 139.9062648, count: 9, date: '7/8/1990' },
+        { lat: 39.19533284, lon: 139.9055145, count: 1, date: '8/8/1990' },
+        { lat: 39.04000208, lon: 139.8633588, count: 1, date: '9/8/1990' },
+        { lat: 38.54020653, lon: 139.5481553, count: 3, date: '10/8/1990' },
+        { lat: 38.52321119, lon: 139.5377341, count: 1, date: '11/8/1990' },
+        { lat: 41.31168262, lon: 140.8047341, count: 2, date: '16/11/1989' },
+        { lat: 41.33925066, lon: 140.8168475, count: 14, date: '17/9/1983' },
+        { lat: 41.45372473, lon: 140.8791034, count: 9, date
